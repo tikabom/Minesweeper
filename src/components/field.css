@@ -1,0 +1,67 @@
+.field {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  border: 1px solid;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  font-weight: bold;
+}
+
+.flag {
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Minesweeper_flag.svg/2000px-Minesweeper_flag.svg.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 30px;
+  height: 30px;
+}
+
+.field-closed {
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Minesweeper_unopened_square.svg/2000px-Minesweeper_unopened_square.svg.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 30px;
+  height: 30px;
+}
+
+.field-1 {
+  color: blue;
+}
+
+.field-2 {
+  color: green;
+}
+
+.field-3 {
+  color: red;
+}
+
+.field-4 {
+  color: purple;
+}
+
+.field-5 {
+  color: maroon;
+}
+
+.field-6 {
+  color: turquoise;
+}
+
+.field-7 {
+  color: gray;
+}
+
+.field-8 {
+  color: black;
+}
+
+.mine {
+  background-image: url('http://a1722.phobos.apple.com/us/r30/Purple3/v4/30/ec/c2/30ecc294-7cb4-3b02-6c35-3151bef5b5f7/mzl.tobbabbx.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 30px;
+  height: 30px;
+}
