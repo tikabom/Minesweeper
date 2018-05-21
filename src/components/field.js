@@ -34,7 +34,9 @@ class Field extends React.Component {
       );
     } else if (this.props.opened && !this.props.mine) {
       fieldValue = (
-        <div className={'field-' + this.props.value}>{this.props.value}</div>
+        <div className={'field-' + this.props.value}>
+          {this.props.value > 0 ? this.props.value : ''}
+        </div>
       );
     } else {
       fieldValue = (
