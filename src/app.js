@@ -10,8 +10,12 @@ class App extends React.Component {
 
     this.state = {
       dimension: 9,
-      numMines: 20,
-      board: []
+      numMines: 10,
+      minesFlagged: 0,
+      fieldsOpened: 0,
+      board: [],
+      gameOver: false,
+      gameWon: false
     }
   }
 
@@ -31,9 +35,8 @@ class App extends React.Component {
     }
   }
 
-  setFieldValue = (val, i, j) => {
+  setFieldValue = (val, i, j, board) => {
     let dim = this.state.dimension;
-    let board = this.state.board;
     if (i > 0 && j > 0) {
       if (board[i-1][j-1].value == -1) val++;
     }
@@ -59,9 +62,7 @@ class App extends React.Component {
       if (board[i][j+1].value == -1) val++;
     }
 
-    board[i][j].value = val;
-
-    this.setState({ board });
+    return val;
   }
 
   initBoard = () => {
@@ -74,10 +75,11 @@ class App extends React.Component {
     this.shuffle(mines, dim);
 
     let idx = 0;
+    let board = [];
     for (let i = 0; i < dim; i ++) {
-      this.state.board.push([]);
+      board.push([]);
       for (let j = 0; j < dim; j ++) {
-        this.state.board[i].push({
+        board[i].push({
           opened: false,
           flagged: false,
           value: mines[idx++]
@@ -87,66 +89,125 @@ class App extends React.Component {
 
     for (let i = 0; i < dim; i ++) {
       for (let j = 0; j < dim; j ++) {
-        if (this.state.board[i][j].value !== -1)
-          this.setFieldValue(0, i, j)
+        if (board[i][j].value !== -1)
+          board[i][j].value = this.setFieldValue(0, i, j, board)
       }
     }
+
+
+    this.setState({
+      minesFlagged: 0,
+      fieldsOpened: 0,
+      board,
+      gameOver: false,
+      gameWon: false
+    });
+  }
+
+  isGameWon = (minesFlagged, fieldsOpened) => {
+    let dim = this.state.dimension;
+
+    if (minesFlagged == this.state.numMines &&
+      (fieldsOpened + minesFlagged) == (dim * dim))
+        return true;
+
+    return false;
   }
 
   endGame = () => {
-    console.log('game over');
+    let dim = this.state.dimension;
+    let board = this.state.board;
+
+    for (let i = 0; i < dim; i ++) {
+      for (let j = 0; j < dim; j ++) {
+        if (board[i][j].value === -1)
+          board[i][j].opened = true;
+      }
+    }
+
+    this.setState({ board, gameOver: true });
   }
 
-  openNeighbors = (i, j) => {
-    let board = this.state.board;
+  openNeighbors = (i, j, board, numOpened) => {
     let dim = this.state.dimension;
 
+    if (board[i][j].opened || board[i][j].flagged) return numOpened;
+
+    board[i][j].opened = true;
+    numOpened += 1;
+
     if (i > 0 && j > 0) {
-      if (board[i-1][j-1].value !== -1) this.onOpen(i-1, j-1);
+      if (board[i-1][j-1].value !== -1) numOpened = this.openNeighbors(i-1, j-1, board, numOpened);
     }
     if (i > 0 && j < dim-1) {
-      if (board[i-1][j+1].value !== -1) this.onOpen(i-1, j+1);
+      if (board[i-1][j+1].value !== -1) numOpened = this.openNeighbors(i-1, j+1, board, numOpened);
     }
     if (i < dim-1 && j < dim-1) {
-      if (board[i+1][j+1].value !== -1) this.onOpen(i+1, j+1);
+      if (board[i+1][j+1].value !== -1) numOpened = this.openNeighbors(i+1, j+1, board, numOpened);
     }
     if (i < dim-1 && j > 0) {
-      if (board[i+1][j-1].value !== -1) this.onOpen(i+1, j-1);
+      if (board[i+1][j-1].value !== -1) numOpened = this.openNeighbors(i+1, j-1, board, numOpened);
     }
     if (i > 0) {
-      if (board[i-1][j].value !== -1) this.onOpen(i-1, j);
+      if (board[i-1][j].value !== -1) numOpened = this.openNeighbors(i-1, j, board, numOpened);
     }
     if (j > 0) {
-      if (board[i][j-1].value !== -1) this.onOpen(i, j-1);
+      if (board[i][j-1].value !== -1) numOpened = this.openNeighbors(i, j-1, board, numOpened);
     }
     if (i < dim-1) {
-      if (board[i+1][j].value !== -1) this.onOpen(i+1, j);
+      if (board[i+1][j].value !== -1) numOpened = this.openNeighbors(i+1, j, board, numOpened);
     }
     if (j < dim-1) {
-      if (board[i][j+1].value !== -1) this.onOpen(i, j+1);
+      if (board[i][j+1].value !== -1) numOpened = this.openNeighbors(i, j+1, board, numOpened);
     }
+
+    return numOpened;
   }
 
   onOpen = (i, j) => {
+    if (this.state.gameWon || this.state.gameOver) return;
+
     let dim = this.state.dimension;
     let field = this.state.board[i][j];
     if (!field.opened && !field.flagged) {
       let board = this.state.board;
-      board[i][j].opened = true;
-      this.setState({ board });
-
-      if (field.value === -1) this.endGame();
-      else if (field.value === 0) this.openNeighbors(i, j);
+      let fieldsOpened = this.state.fieldsOpened;
+      if (field.value === -1) {
+        this.endGame();
+        return;
+      }
+      if (field.value === 0) fieldsOpened += this.openNeighbors(i, j, board, 0);
+      else {
+        board[i][j].opened = true;
+        fieldsOpened += 1;
+      }
+      this.setState({
+        board,
+        fieldsOpened,
+        gameWon: this.isGameWon(this.state.minesFlagged, fieldsOpened)
+      });
     }
   }
 
   onFlag = (i,j) => {
+    if (this.state.gameWon || this.state.gameOver) return;
+
     let dim = this.state.dimension;
     let field = this.state.board[i][j];
-    if (!field.opened && !field.flagged) {
+    if (!field.opened) {
+      let minesFlagged = this.state.minesFlagged;
       let board = this.state.board;
-      board[i][j].flagged = true;
-      this.setState({ board });
+      board[i][j].flagged = !board[i][j].flagged;
+      if (board[i][j].flagged && field.value === -1)
+        minesFlagged += 1;
+      else if (!board[i][j].flagged && field.value === -1)
+        minesFlagged -= 1;
+
+      this.setState({
+        board,
+        minesFlagged,
+        gameWon: this.isGameWon(minesFlagged, this.state.fieldsOpened)
+      });
     }
   }
 
@@ -168,8 +229,19 @@ class App extends React.Component {
       );
     });
     return (
-      <div>
-        {board}
+      <div className='game'>
+        <div className='newgame'>
+          <input type='button' onClick={this.initBoard} value='New Game' />
+        </div>
+        <div className='minesweeper'>
+          {board}
+        </div>
+        {this.state.gameOver && (
+          <div className='gameover'>Game Over!</div>
+        )}
+        {this.state.gameWon && (
+          <div className='gamewon'>You Win!</div>
+        )}
       </div>
     );
   }

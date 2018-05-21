@@ -1,3 +1,25 @@
+.game {
+  padding: 10px;
+}
+
+.newgame {
+  margin-bottom: 10px;
+}
+
+.gameover {
+  margin-top: 10px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: red;
+}
+
+.gamewon {
+  margin-top: 10px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: green;
+}
+
 .fieldrow {
   display: flex;
 }
