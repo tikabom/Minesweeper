@@ -13,3 +13,9 @@ src/app.js contains the bulk of the minesweeper logic. Below is a description of
 
 src/components/field.js renders the fields based on the value. All styles are defined in src/components/field.css
 Note: All images are obtained from Wikimedia.
+
+To run the game:
+1. cd into the root folder (Minesweeper)
+2. run npm install (you might need to install Node on your machine)
+3. run npm run dev
+4. type in localhost:8080 in the browser to access application root
